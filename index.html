@@ -466,6 +466,22 @@ footer{padding:0 var(--pad) 28px}
   addEventListener('pointerdown', onPtr, { passive: true });
   addEventListener('scroll', () => { if (lastCX >= 0) trackers.forEach(t => t.update(lastCX, lastCY)); }, { passive: true });
   document.addEventListener('pointerleave', () => trackers.forEach(t => { t.inside = false; }));
+  // touch: keep tracking the finger even while the page scrolls (pointer events stop once a scroll starts)
+  let touching = false, lastTouchT = -1e9;
+  const onTouch = e => {
+    const t = e.touches[0]; if (!t) return;
+    lastCX = t.clientX; lastCY = t.clientY; touching = true; lastTouchT = performance.now();
+    trackers.forEach(tr => tr.update(lastCX, lastCY));
+  };
+  addEventListener('touchstart', onTouch, { passive: true });
+  addEventListener('touchmove', onTouch, { passive: true });
+  // keep the touch "alive" briefly so a quick tap still bursts the bust into dust
+  const onTouchEnd = () => {
+    touching = false; lastTouchT = performance.now();
+    setTimeout(() => { if (!touching) trackers.forEach(t => { if (!t.auto) { t.inside = false; t.px = null; } }); }, 450);
+  };
+  addEventListener('touchend', onTouchEnd, { passive: true });
+  addEventListener('touchcancel', onTouchEnd, { passive: true });
 
   function Particles(N) {
     this.N = N; this.head = 0;
@@ -592,6 +608,17 @@ footer{padding:0 var(--pad) 28px}
     hField.size(w, h);
     hField.decay(0.965);
     const R = Math.min(170, Math.max(90, w * 0.11));
+    // touch screens: when nobody is touching, an invisible finger sweeps across the bust every few seconds
+    if (!hoverable && !touching && now - lastTouchT > 2500 && p < 0.05) {
+      const t = (now % 6500) / 1000;
+      if (t < 2.4) {
+        const k = t / 2.4;
+        if (!hPtr.auto) { hPtr.px = null; hPtr.auto = true; }
+        hPtr.x = w * (0.12 + 0.76 * k);
+        hPtr.y = h * (0.42 + Math.sin(k * Math.PI * 2) * 0.1);
+        hPtr.inside = true;
+      } else if (hPtr.auto) { hPtr.inside = false; hPtr.auto = false; }
+    } else if (hPtr.auto) { hPtr.inside = false; hPtr.auto = false; }
     hPtr.paint(hField, R, hPts);
 
     let A = null, B = null, wt = 0;
