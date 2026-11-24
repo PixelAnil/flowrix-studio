@@ -501,7 +501,7 @@ footer{padding:0 var(--pad) 28px}
   // HERO: halftone bust (Flow video) + mouse dust + scroll dissolve → manifesto
   // =====================================================================
   const FPS = 24;
-  const SRC = { yatay: 'media/yatay.mp4', dikey: 'media/dikey.mp4' };
+  const SRC = { yatay: 'media/yatay.mp4' };
   const pin = document.getElementById('top');
   const stage = document.getElementById('hero');
   const cv = document.getElementById('cv');
@@ -514,7 +514,8 @@ footer{padding:0 var(--pad) 28px}
 
   let mode = null, video = null, cache = null, CW = 0, CH = 0, nFrames = 0;
   let cached = false, loopStart = 0, live = null, lastT = -1, hasRVFC = false;
-  const pickMode = () => (innerWidth / innerHeight < 0.9 ? 'dikey' : 'yatay');
+  // phones use the same close-up video as desktop (zoomed in below) so the face stays big and readable
+  const pickMode = () => 'yatay';
 
   function load(m) {
     mode = m; cached = false; live = null; lastT = -1;
@@ -608,15 +609,22 @@ footer{padding:0 var(--pad) 28px}
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = DOTC;
     if (A) {
-      const scale = mode === 'yatay' ? (h * 0.98) / CH : (h * 0.72) / CH;
-      const ox = (w - CW * scale) / 2;
-      let oy = mode === 'yatay' ? h * 0.075 : h * 0.17;
-      if (mode === 'dikey') {
+      const portrait = w / h < 0.9;
+      let scale, ox, oy;
+      if (!portrait) {
+        scale = (h * 0.98) / CH; ox = (w - CW * scale) / 2; oy = h * 0.075;
+      } else {
+        // the bust is ~55% of the video's width: zoom so it spans the phone screen, start it under the headline
         const h1 = htext.querySelector('.h1');
         const h1b = h1.offsetTop + h1.offsetHeight;
-        oy = Math.max(oy, h1b + 14 - 0.165 * CH * scale);   // the head sits ~16.5% down the vertical video
+        const avail = h - h1b - h * 0.2;                          // room between headline and the bottom text
+        scale = Math.min(w * 2.3, Math.max(w * 1.8, (avail / (CH * 0.85)) * CW)) / CW;   // tall phones: bigger bust
+        ox = (w - CW * scale) / 2;
+        oy = h1b + 8 - 0.04 * CH * scale;
       }
       const fadeH = h * 0.22;
+      const vEnd = oy + CH * scale, vFadeH = CH * scale * 0.3;   // soften where the video frame ends (phones)
+      const fadeAt = y => Math.max(0, Math.min(1, y > h - fadeH ? (h - y) / fadeH : 1, y > vEnd - vFadeH ? (vEnd - y) / vFadeH : 1));
       // scroll dissolve: a soft edge sweeps from the top of the bust to the bottom
       const s = clamp((p - 0.04) / 0.5);
       const band = h * 0.22;
@@ -627,7 +635,7 @@ footer{padding:0 var(--pad) 28px}
         if (u < 0 || v < 0 || u >= CW || v >= CH) return 0;
         const k = (v | 0) * CW + (u | 0);
         const l = B ? A[k] + (B[k] - A[k]) * wt : A[k];
-        const bt = sy > h - fadeH ? Math.max(0, (h - sy) / fadeH) : 1;
+        const bt = fadeAt(sy);
         return TONE[l | 0] * bt;
       };
 
@@ -661,7 +669,7 @@ footer{padding:0 var(--pad) 28px}
       }
 
       if (sweepY - band < h) {
-        const cell = w < 700 ? 4 : 5;
+        const cell = w < 700 ? 3.5 : 5;
         const cols = Math.ceil(w / cell), rows = Math.ceil(h / cell);
         const c0 = Math.max(0, Math.floor((ox - 80) / cell)), c1 = Math.min(cols, Math.ceil((ox + CW * scale + 80) / cell));
         const r0 = Math.max(0, Math.floor(Math.max(oy, sweepY - band) / cell));
@@ -670,7 +678,7 @@ footer{padding:0 var(--pad) 28px}
         ctx.beginPath();
         for (let r = r0; r < rows; r++) {
           const y = r * cell + cell / 2;
-          const bott = y > h - fadeH ? Math.max(0, (h - y) / fadeH) : 1;
+          const bott = fadeAt(y);
           if (bott <= 0) break;
           const v0 = (y - oy) / scale;
           if (v0 >= CH) break;
