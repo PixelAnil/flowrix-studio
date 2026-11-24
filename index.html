@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Flowrix Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1B1B1B; --ink:#F1ECE3; --muted:rgba(241,236,227,.55); --accent:#B08A4E;
+  --line:rgba(241,236,227,.4); --hair:rgba(241,236,227,.14); --panel:#222;
+  --pad:36px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--ink);font-family:Jost,system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+a{color:inherit;text-decoration:none}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.serif{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:500;letter-spacing:-.01em}
+.label{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--hair);color:var(--muted)}
+.label b{color:var(--ink);font-weight:500}
+
+/* ---------- nav (fixed, inverts over light areas) ---------- */
+nav{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:26px var(--pad);mix-blend-mode:difference;color:#F1ECE3}
+.logo{display:flex;flex-direction:column;line-height:.8}
+.logo .wm{font-weight:700;font-size:26px;letter-spacing:-.045em}
+.logo .st{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:11px;letter-spacing:.32em;margin-top:5px;padding-left:2px}
+.menu{display:flex;gap:40px}
+.menu a{transition:opacity .2s}
+.menu a:hover{opacity:.55}
+.cta{border:1px solid rgba(241,236,227,.5);padding:9px 14px;transition:background .25s,color .25s}
+.cta:hover{background:#F1ECE3;color:#000}
+
+/* ---------- 01 hero → manifesto (pinned) ---------- */
+.pin{position:relative;height:280vh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;cursor:crosshair}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.htext{position:absolute;inset:0;z-index:2;pointer-events:none;will-change:opacity,transform}
+.h{position:absolute;font-weight:600;letter-spacing:-.045em;line-height:.9;font-size:clamp(40px,min(7.4vw,13vh),128px)}
+.h1{top:clamp(96px,15vh,150px);left:var(--pad)}
+.h2{right:var(--pad);bottom:34px}
+.sub{position:absolute;left:var(--pad);bottom:36px;max-width:300px;font-size:16px;line-height:1.3;font-weight:500}
+.tag{position:absolute;display:flex;gap:10px;align-items:flex-start}
+.tag i{width:10px;height:10px;background:var(--accent);margin-top:2px;flex:none}
+.tag b{display:block;font-weight:500;font-size:11px}
+.tag span{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
+.t1{right:var(--pad);top:23%}
+.t2{right:9%;top:43%}
+.t3{left:12%;top:66%}
+.hint{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted)}
+.hint i{width:1px;height:42px;background:linear-gradient(var(--ink),transparent);animation:drip 1.8s cubic-bezier(.6,0,.3,1) infinite;transform-origin:top}
+@keyframes drip{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+
+.mani{position:absolute;z-index:3;left:var(--pad);right:var(--pad);bottom:clamp(40px,9vh,96px);pointer-events:none}
+.mani .label{margin-bottom:clamp(28px,4vw,48px)}
+.mani h2{font-size:clamp(26px,min(6vw,9.5vh),104px);font-weight:600;letter-spacing:-.05em;line-height:.96}
+.mani h2 .serif{font-weight:500;letter-spacing:-.02em}
+.ln{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em}
+.ln>span{display:block;transform:translateY(110%);will-change:transform}
+.mani .meta{display:flex;gap:56px;margin-top:clamp(28px,4vw,48px);color:var(--muted)}
+.mani .meta b{display:block;color:var(--ink);font-weight:500;margin-top:6px}
+
+/* ---------- marquee ---------- */
+.mq{overflow:hidden;padding:clamp(26px,3.5vw,52px) 0;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.mq-track{display:flex;width:max-content;will-change:transform}
+.mq-track span{font-size:clamp(64px,11vw,190px);font-weight:600;letter-spacing:-.045em;line-height:1;padding-right:.3em;white-space:nowrap;color:transparent;-webkit-text-stroke:1px rgba(241,236,227,.5)}
+.mq-track span.f{color:var(--ink);-webkit-text-stroke:0}
+.mq-track i{font-style:normal;font-size:clamp(40px,6vw,100px);color:var(--accent);padding-right:.5em;align-self:center;line-height:1}
+
+/* ---------- 02 works (stacked panels) ---------- */
+.whead{padding:clamp(110px,13vw,190px) var(--pad) clamp(40px,5vw,72px)}
+.whead .label{margin-bottom:clamp(40px,6vw,80px)}
+.whead .row{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.big{font-weight:600;letter-spacing:-.05em;line-height:.88;font-size:clamp(60px,12vw,210px)}
+.whead p{max-width:300px;color:var(--muted);font-size:15px;line-height:1.45}
+.stack{position:relative}
+.panel{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:block}
+.pc{position:absolute;inset:0;transform-origin:50% 0%;will-change:transform;background:var(--panel);overflow:hidden}
+.pc img,.pc video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pc img{opacity:0}
+.pc video{opacity:0;transition:opacity .8s}
+.panel.playing .pc video{opacity:1}
+.pc .dev{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.pc .grad{position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(to top,rgba(12,12,12,.78),rgba(12,12,12,0) 48%),linear-gradient(to bottom,rgba(12,12,12,.5),rgba(12,12,12,0) 22%)}
+.pc .shade{position:absolute;inset:0;z-index:6;background:#0c0c0c;opacity:0;pointer-events:none}
+.pc .ui{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;justify-content:space-between;padding:100px var(--pad) 36px}
+.pc .top{display:flex;justify-content:space-between;gap:16px}
+.pc .bot{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.pc h3{font-size:clamp(60px,12vw,220px);font-weight:600;letter-spacing:-.055em;line-height:.84}
+.pc .go{display:flex;align-items:center;gap:10px;padding-bottom:10px}
+.pc .go i{font-style:normal;transition:transform .3s}
+.panel:hover .go i{transform:translateX(5px)}
+.ph{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(241,236,227,.12) 1px,transparent 1.5px);background-size:12px 12px}
+.ph .ghost{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--muted);text-align:center;line-height:1.8}
+.outline{color:transparent;-webkit-text-stroke:1px var(--ink)}
+.peek{position:fixed;left:0;top:0;z-index:50;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;pointer-events:none;transform:scale(0);transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+.peek.on{transform:scale(1)}
+.peek{transition:transform .4s cubic-bezier(.2,.7,.2,1),background-color .5s,color .5s,border-color .5s,backdrop-filter .5s;border:1px solid transparent}
+.peek.glass{background:rgba(241,236,227,.12);color:var(--ink);border-color:rgba(241,236,227,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.wend{display:flex;justify-content:center;padding:clamp(72px,9vw,120px) 0 0}
+.btn{display:inline-flex;align-items:center;gap:12px;border:1px solid var(--line);padding:16px 26px;border-radius:999px;transition:background .3s,color .3s}
+.btn:hover{background:var(--ink);color:var(--bg)}
+
+/* ---------- 03 services ---------- */
+.services{padding:clamp(110px,13vw,190px) var(--pad)}
+.services .label{margin-bottom:clamp(24px,3vw,40px)}
+.srv{display:grid;grid-template-columns:70px 1fr minmax(0,300px);align-items:center;gap:24px;padding:clamp(16px,2.2vw,30px) 0;border-bottom:1px solid var(--hair);cursor:default}
+.srv .n{color:var(--muted)}
+.srv .t{font-size:clamp(58px,11vw,190px);font-weight:600;letter-spacing:-.055em;line-height:.9;padding-bottom:.04em;
+  color:transparent;-webkit-text-stroke:1px rgba(241,236,227,.55);
+  background:linear-gradient(90deg,var(--ink) 0 50%,transparent 50% 100%);background-size:200% 100%;background-position:100% 0;
+  -webkit-background-clip:text;background-clip:text;transition:background-position .9s cubic-bezier(.7,0,.2,1)}
+.srv:hover .t,.srv.fill .t{background-position:0 0}
+.srv .d p{font-size:15px;line-height:1.5;color:var(--muted);margin-bottom:12px;transition:color .5s}
+.srv:hover .d p,.srv.fill .d p{color:var(--ink)}
+.srv .d ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted)}
+.srv .d li::before{content:"✦ ";color:var(--accent)}
+
+/* ---------- 04 process (horizontal pin) ---------- */
+.hpin{position:relative}
+.hstage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+.hlabel{position:absolute;top:100px;left:var(--pad);right:var(--pad)}
+.htrack{position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;padding-left:var(--pad);will-change:transform}
+.hp{flex:none;width:min(58vw,860px);padding-right:6vw}
+.hp.q{width:min(86vw,1300px)}
+.hp.q blockquote{font-size:clamp(56px,8.6vw,150px);line-height:.95}
+.hp.q small{display:block;margin-top:28px;color:var(--muted)}
+.hp .num{display:block;font-size:clamp(130px,21vw,360px);font-weight:700;letter-spacing:-.06em;line-height:.78}
+.hp h4{font-size:clamp(34px,3.8vw,64px);font-weight:600;letter-spacing:-.04em;margin-top:28px}
+.hp p{color:var(--muted);max-width:440px;font-size:17px;line-height:1.5;margin-top:12px}
+.hbar{position:absolute;left:var(--pad);right:var(--pad);bottom:40px;height:1px;background:var(--hair)}
+.hbar i{display:block;height:100%;background:var(--ink);transform-origin:0 0;transform:scaleX(0)}
+
+/* ---------- 05 contact + footer ---------- */
+.contact{padding:clamp(110px,13vw,190px) var(--pad) 0}
+.contact .label{margin-bottom:clamp(40px,6vw,80px)}
+.contact h2{font-size:clamp(56px,10.5vw,190px);font-weight:600;letter-spacing:-.055em;line-height:.9}
+.rvl .ln>span{transition:transform 1.1s cubic-bezier(.2,.7,.2,1)}
+.rvl .ln:nth-child(2)>span{transition-delay:.08s}
+.rvl .ln:nth-child(3)>span{transition-delay:.16s}
+.rvl.in .ln>span{transform:none}
+.crow{display:flex;flex-wrap:wrap;gap:24px 56px;align-items:flex-end;justify-content:space-between;margin-top:clamp(48px,6vw,80px)}
+.clist{display:grid;grid-template-columns:repeat(3,auto);gap:12px 56px}
+.clist span{display:block;color:var(--muted);margin-bottom:6px}
+.clist a{font-size:18px;border-bottom:1px solid var(--hair);padding-bottom:3px;transition:border-color .3s}
+.clist a:hover{border-color:var(--ink)}
+.round{width:150px;height:150px;border-radius:50%;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.5;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.round:hover{transform:scale(1.08) rotate(-6deg)}
+footer{padding:0 var(--pad) 28px}
+.fwrap{position:relative;height:25vw;margin:clamp(64px,9vw,140px) 0 10px;cursor:crosshair}
+#fcv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fsub{display:flex;justify-content:space-between;color:var(--muted);margin-bottom:28px}
+.foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--muted);border-top:1px solid var(--hair);padding-top:18px}
+.foot a:hover{color:var(--ink)}
+.foot{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:clamp(24px,4vw,56px)}
+.foot .pol{display:flex;flex-wrap:wrap;gap:8px 24px}
+.foot .fc{color:var(--ink);text-align:center}
+.foot .fr{justify-self:end;display:flex;gap:26px;flex-wrap:wrap}
+@media (max-width:900px){ .foot{grid-template-columns:1fr;row-gap:14px} .foot .pol{flex-direction:column;gap:8px} .foot .fc{text-align:left} .foot .fr{justify-self:start} }
+@media (hover:hover){ .panel, .panel *{cursor:none} }
+
+.rv{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+
+@media (max-width:900px){
+  .menu{display:none}
+  .t2,.t3{display:none}
+  .t1{top:auto;bottom:150px;right:auto;left:20px}
+  .srv{grid-template-columns:44px 1fr}
+  .srv .d{grid-column:2}
+  .clist{grid-template-columns:1fr}
+  .hp{width:78vw}
+  .hp.q{width:88vw}
+}
+@media (max-width:700px){
+  :root{--pad:16px}
+  nav{padding:18px var(--pad)}
+  .h{font-size:15vw}
+  .h1{top:88px}
+  .h2{bottom:96px}
+  .sub{right:var(--pad);bottom:28px;max-width:none;font-size:14px}
+  .t1,.hint{display:none}
+  .pin{height:240vh}
+  .mani .meta{gap:28px;flex-wrap:wrap}
+  .mani h2{font-size:min(9vw,5.6vh)}
+  .whead .row{flex-direction:column;align-items:flex-start}
+  .pc .ui{padding:84px var(--pad) 24px}
+  .pc .bot{flex-direction:column;align-items:flex-start}
+  .pc h3{font-size:16vw}
+  .hp{width:86vw}
+  .hp .num{font-size:40vw}
+  .hlabel{top:84px}
+  .contact h2{font-size:13vw}
+  .fwrap{height:27vw}
+}
+@media (max-height:520px){
+  .mani .meta,.t1,.t2,.t3,.hint{display:none}
+  .mani .label{margin-bottom:14px}
+  .h1{top:84px}
+}
+@media (prefers-reduced-motion:reduce){
+  .rv{opacity:1;transform:none;transition:none}
+  .rvl .ln>span{transform:none;transition:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#top"><span class="wm">flowrix</span><span class="st">STUDİO</span></a>
+  <div class="menu mono"><a href="#isler">İşler</a><a href="#hizmetler">Hizmetler</a><a href="#surec">Süreç</a><a href="#iletisim">İletişim</a></div>
+  <a class="cta mono" href="https://wa.me/905053265220?text=Merhaba%2C%20Flowrix%20Studio%20ile%20tan%C4%B1%C5%9Fmak%20istiyorum." target="_blank" rel="noopener">Tanışalım</a>
+</nav>
+
+<!-- ========== 01 HERO → MANIFESTO ========== -->
+<section class="pin" id="top">
+  <div class="stage" id="hero">
+    <canvas id="cv"></canvas>
+
+    <div class="htext">
+      <div class="h h1">Görünmek<br>yetmez.</div>
+      <div class="h h2">Hatırlan.</div>
+      <p class="sub">Markaların hatırlanması için web sitesi, video ve tanıtım üretiyoruz.</p>
+      <div class="tag t1 mono"><i></i><div><b>ESTD. 2025</b><span>Flowrix Studİo</span></div></div>
+      <div class="tag t2 mono"><i></i><div><b>Web · Vİdeo · Tanıtım</b><span>Hİzmetler</span></div></div>
+      <div class="tag t3 mono"><i></i><div><b>M. Aurelİus</b><span>Her İşİ son<br>İşİnmİş gİbİ yap</span></div></div>
+      <div class="hint mono"><span>Kaydır</span><i></i></div>
+    </div>
+
+    <div class="mani">
+      <div class="label mono"><b>(01) — Stüdyo</b><span>Flowrİx Studİo</span></div>
+      <h2>
+        <span class="ln"><span>Flowrix, markalar için</span></span>
+        <span class="ln"><span><span class="serif">kalıcı</span> dijital işler üreten</span></span>
+        <span class="ln"><span>bir stüdyo. Az iş alırız,</span></span>
+        <span class="ln"><span>her birini <span class="serif">sonuna kadar</span> götürürüz.</span></span>
+      </h2>
+      <div class="meta mono">
+        <div>Ne yaparız<b>Web sİtesİ · Vİdeo · Tanıtım</b></div>
+        <div>Nasıl<b>Az ama özenlİ</b></div>
+        <div>Kuruluş<b>ESTD. 2025</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="mq" aria-hidden="true">
+  <div class="mq-track" data-dir="-1">
+    <span>Web sitesi</span><i>✦</i><span class="f">Video</span><i>✦</i><span>Tanıtım</span><i>✦</i>
+    <span>Web sitesi</span><i>✦</i><span class="f">Video</span><i>✦</i><span>Tanıtım</span><i>✦</i>
+  </div>
+</div>
+
+<!-- ========== 02 SEÇİLİ İŞLER ========== -->
+<section id="isler">
+  <div class="whead">
+    <div class="label mono"><b>(02) — Seçİlİ İşler</b><span>2025 —</span></div>
+    <div class="row">
+      <h2 class="big rv">Seçili <span class="serif">işler</span></h2>
+      <p class="rv">Birlikte çalıştığımız markalar için ürettiğimiz işlerden bir seçki. Her biri ayrı bir hikâye.</p>
+    </div>
+  </div>
+
+  <div class="stack">
+    <a class="panel" href="https://qzendizayn.com/" target="_blank" rel="noopener" data-name="QZEN Dizayn">
+      <div class="pc">
+        <img src="media/qzen-poster.jpg" alt="QZEN Dizayn">
+        <video src="media/qzen.mp4" muted playsinline preload="none"></video>
+        <canvas class="dev"></canvas>
+        <div class="grad"></div>
+        <div class="ui">
+          <div class="top mono"><span>01 / 04</span><span>Web sİtesİ · Vİdeo — 2026</span></div>
+          <div class="bot"><h3>QZEN<br>Dizayn</h3><span class="go mono">Projeyİ İncele <i>→</i></span></div>
+        </div>
+        <div class="shade"></div>
+      </div>
+    </a>
+
+    <a class="panel" href="#">
+      <div class="pc">
+        <div class="ph"><div class="ghost mono">Görsel / vİdeo<br>buraya gelecek</div></div>
+        <div class="ui">
+          <div class="top mono"><span>02 / 04</span><span>Kategorİ — Yıl</span></div>
+          <div class="bot"><h3 class="outline">Proje<br>adı</h3><span class="go mono">Projeyİ İncele <i>→</i></span></div>
+        </div>
+        <div class="shade"></div>
+      </div>
+    </a>
+
+    <a class="panel" href="#">
+      <div class="pc">
+        <div class="ph"><div class="ghost mono">Görsel / vİdeo<br>buraya gelecek</div></div>
+        <div class="ui">
+          <div class="top mono"><span>03 / 04</span><span>Kategorİ — Yıl</span></div>
+          <div class="bot"><h3 class="outline">Proje<br>adı</h3><span class="go mono">Projeyİ İncele <i>→</i></span></div>
+        </div>
+        <div class="shade"></div>
+      </div>
+    </a>
+
+    <a class="panel" href="#">
+      <div class="pc">
+        <div class="ph"><div class="ghost mono">Görsel / vİdeo<br>buraya gelecek</div></div>
+        <div class="ui">
+          <div class="top mono"><span>04 / 04</span><span>Kategorİ — Yıl</span></div>
+          <div class="bot"><h3 class="outline">Proje<br>adı</h3><span class="go mono">Projeyİ İncele <i>→</i></span></div>
+        </div>
+        <div class="shade"></div>
+      </div>
+    </a>
+  </div>
+  <div class="wend"><a class="btn mono" href="#">Tüm İşler <span>→</span></a></div>
+</section>
+
+<!-- ========== 03 HİZMETLER ========== -->
+<section class="services" id="hizmetler">
+  <div class="label mono"><b>(03) — Hİzmetler</b><span>Ne yaparız</span></div>
+  <div class="srv">
+    <span class="n mono">01</span><span class="t">Web sitesi</span>
+    <div class="d"><p>Markana özel tasarlanmış, hızlı açılan ve kendi panelinden kolayca düzenleyebileceğin siteler.</p>
+      <ul class="mono"><li>Tasarım</li><li>Gelİştİrme</li><li>Panel</li><li>Yayın</li></ul></div>
+  </div>
+  <div class="srv">
+    <span class="n mono">02</span><span class="t">Video</span>
+    <div class="d"><p>Markanı anlatan sinematik tanıtım videoları; site açılışları ve sosyal medya için.</p>
+      <ul class="mono"><li>Konsept</li><li>Üretİm</li><li>Kurgu</li></ul></div>
+  </div>
+  <div class="srv">
+    <span class="n mono">03</span><span class="t">Tanıtım</span>
+    <div class="d"><p>Markanın her yerde aynı dili konuşması için görseller, sunumlar ve tanıtım materyalleri.</p>
+      <ul class="mono"><li>Sosyal medya</li><li>Sunum</li><li>Görsel dİl</li></ul></div>
+  </div>
+</section>
+
+<div class="mq" aria-hidden="true">
+  <div class="mq-track" data-dir="1">
+    <span class="f">Az ama özenli</span><i>✦</i><span>Sonuna kadar</span><i>✦</i>
+    <span class="f">Az ama özenli</span><i>✦</i><span>Sonuna kadar</span><i>✦</i>
+  </div>
+</div>
+
+<!-- ========== 04 SÜREÇ ========== -->
+<section class="hpin" id="surec">
+  <div class="hstage">
+    <div class="hlabel label mono"><b>(04) — Süreç</b><span>Nasıl çalışırız</span></div>
+    <div class="htrack">
+      <div class="hp q"><blockquote class="serif">“Her işi, hayatının son işiymiş gibi yap.”</blockquote><small class="mono">— Marcus Aurelİus, Düşünceler 2.5 · Bİzİm çalışma bİçİmİmİz</small></div>
+      <div class="hp"><span class="num outline">01</span><h4>Tanışma</h4><p>Markanı, hedefini ve seni dinleriz. Neye ihtiyacın olduğunu birlikte netleştiririz.</p></div>
+      <div class="hp"><span class="num outline">02</span><h4>Tasarım</h4><p>İlk taslağı hazırlarız. Görürsün, yorumlarsın, birlikte oturturuz.</p></div>
+      <div class="hp"><span class="num outline">03</span><h4>Üretim</h4><p>Site, video, görseller. Her detay elden geçer, yarım hiçbir şey kalmaz.</p></div>
+      <div class="hp"><span class="num outline">04</span><h4>Yayın</h4><p>Onayınla canlıya alırız. Sonrasında da yanındayız.</p></div>
+    </div>
+    <div class="hbar"><i></i></div>
+  </div>
+</section>
+
+<!-- ========== 05 İLETİŞİM ========== -->
+<section class="contact" id="iletisim">
+  <div class="label mono"><b>(05) — İletİşİm</b><span>Yenİ projeler İçİn açığız</span></div>
+  <h2 class="rvl">
+    <span class="ln"><span>Sıradaki kalıcı iş</span></span>
+    <span class="ln"><span><span class="serif">seninki</span> olsun.</span></span>
+  </h2>
+  <div class="crow rv">
+    <div class="clist mono">
+      <div><span>E-posta</span><a href="mailto:anlbaday25@gmail.com" style="text-transform:none">anlbaday25@gmail.com</a></div>
+      <div><span>WhatsApp</span><a href="https://wa.me/905053265220" target="_blank" rel="noopener">0505 326 52 20</a></div>
+      <div><span>Instagram</span><a href="https://instagram.com/flowrixstudio" target="_blank" rel="noopener" style="text-transform:none">@flowrixstudio</a></div>
+    </div>
+    <a class="round mono" href="https://wa.me/905053265220" target="_blank" rel="noopener">Projenİ<br>anlat →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="fwrap"><canvas id="fcv" aria-label="flowrix"></canvas></div>
+  <div class="fsub mono"><span class="serif" style="font-style:normal;letter-spacing:.5em;text-transform:none;font-size:14px">STUDİO</span><span>ESTD. 2025</span></div>
+  <div class="foot mono"><div class="pol"><a href="gizlilik-politikasi.html">Gİzlİlİk Polİtİkası</a><a href="kvkk-aydinlatma-metni.html">KVKK Aydınlatma Metnİ</a><a href="cerez-politikasi.html">Çerez Polİtİkası</a></div><span class="fc">Kalıcı İşler</span><div class="fr"><span>© 2025 Flowrix Studİo</span><a href="#top">Yukarı ↑</a></div></div>
+</footer>
+
+<div class="peek mono" aria-hidden="true">İncele →</div>
+
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hoverable = matchMedia('(hover: hover)').matches;
+  const clamp = (v, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
+  const smooth = (a, b, v) => { const t = clamp((v - a) / (b - a)); return t * t * (3 - 2 * t); };
+  function hash(a, b, c) {
+    let h = (a * 374761393 + b * 668265263 + c * 1274126177) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  }
+  const DOTC = '#F1ECE3';
+  const TONE = new Float32Array(256);
+  for (let i = 0; i < 256; i++) { const v = (i / 255 - 0.08) / 0.8; TONE[i] = v <= 0 ? 0 : Math.pow(Math.min(v, 1), 1.25); }
+
+  // ---------- smooth scroll ----------
+  let lenis = null;
+  if (!reduce && window.Lenis) {
+    lenis = new Lenis({ lerp: 0.09 });
+  }
+  document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+    const id = a.getAttribute('href');
+    if (id === '#') { e.preventDefault(); return; }
+    const t = document.querySelector(id); if (!t) return;
+    e.preventDefault();
+    if (lenis) lenis.scrollTo(t, { duration: 1.6 }); else t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+  }));
+
+  // ---------- shared helpers: trail field, pointer, particles ----------
+  function Field(fc) { this.fc = fc; this.w = 0; this.h = 0; this.a = new Float32Array(0); }
+  Field.prototype.size = function (w, h) {
+    const fw = Math.ceil(w / this.fc), fh = Math.ceil(h / this.fc);
+    if (fw !== this.w || fh !== this.h) { this.w = fw; this.h = fh; this.a = new Float32Array(fw * fh); }
+  };
+  Field.prototype.decay = function (k) { const a = this.a; for (let i = 0; i < a.length; i++) a[i] *= k; };
+  Field.prototype.stamp = function (x, y, R) {
+    const fc = this.fc, W = this.w, H = this.h, a = this.a;
+    const c0 = Math.max(0, ((x - R) / fc) | 0), c1 = Math.min(W - 1, ((x + R) / fc) | 0);
+    const r0 = Math.max(0, ((y - R) / fc) | 0), r1 = Math.min(H - 1, ((y + R) / fc) | 0);
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+      const dx = (c + 0.5) * fc - x, dy = (r + 0.5) * fc - y;
+      const d = Math.sqrt(dx * dx + dy * dy) / R;
+      if (d >= 1) continue;
+      const q = 1 - d, v = q * q * (3 - 2 * q);
+      const k = r * W + c;
+      if (v > a[k]) a[k] = v;
+    }
+  };
+  Field.prototype.at = function (x, y) {
+    const c = Math.min(this.w - 1, Math.max(0, (x / this.fc) | 0)), r = Math.min(this.h - 1, Math.max(0, (y / this.fc) | 0));
+    return this.a[r * this.w + c];
+  };
+
+  const trackers = [];
+  function Pointer(el) { this.el = el; this.x = 0; this.y = 0; this.inside = false; this.px = null; this.py = null; this.dx = 0; this.dy = 0; trackers.push(this); }
+  Pointer.prototype.update = function (cx, cy) {
+    const r = this.el.getBoundingClientRect();
+    this.x = cx - r.left; this.y = cy - r.top;
+    this.inside = this.x >= 0 && this.y >= 0 && this.x <= r.width && this.y <= r.height;
+  };
+  // paints the pointer path into a field; returns the interpolated points
+  Pointer.prototype.paint = function (field, R, out) {
+    out.length = 0; this.dx = 0; this.dy = 0;
+    if (!this.inside) { this.px = null; return out; }
+    if (this.px === null) { this.px = this.x; this.py = this.y; }
+    const dx = this.x - this.px, dy = this.y - this.py, dist = Math.hypot(dx, dy);
+    const steps = Math.max(1, Math.ceil(dist / (field.fc * 1.5)));
+    for (let s = 1; s <= steps; s++) {
+      const sx = this.px + dx * s / steps, sy = this.py + dy * s / steps;
+      field.stamp(sx, sy, R); out.push(sx, sy);
+    }
+    this.dx = dx; this.dy = dy; this.px = this.x; this.py = this.y;
+    return out;
+  };
+  let lastCX = -1, lastCY = -1;
+  const onPtr = e => { lastCX = e.clientX; lastCY = e.clientY; trackers.forEach(t => t.update(lastCX, lastCY)); };
+  addEventListener('pointermove', onPtr, { passive: true });
+  addEventListener('pointerdown', onPtr, { passive: true });
+  addEventListener('scroll', () => { if (lastCX >= 0) trackers.forEach(t => t.update(lastCX, lastCY)); }, { passive: true });
+  document.addEventListener('pointerleave', () => trackers.forEach(t => { t.inside = false; }));
+
+  function Particles(N) {
+    this.N = N; this.head = 0;
+    this.x = new Float32Array(N); this.y = new Float32Array(N); this.vx = new Float32Array(N); this.vy = new Float32Array(N);
+    this.l = new Float32Array(N); this.m = new Float32Array(N); this.d = new Float32Array(N); this.g = new Float32Array(N);
+    this.paths = null;
+  }
+  Particles.prototype.spawn = function (x, y, vx, vy, life, drag, grav) {
+    const j = this.head; this.head = (this.head + 1) % this.N;
+    this.x[j] = x; this.y[j] = y; this.vx[j] = vx; this.vy[j] = vy; this.l[j] = this.m[j] = life; this.d[j] = drag; this.g[j] = grav;
+  };
+  Particles.prototype.draw = function (ctx, dpr, size) {
+    const D = size * dpr, p0 = new Path2D(), p1 = new Path2D(), p2 = new Path2D();
+    let any = false;
+    for (let j = 0; j < this.N; j++) {
+      if (this.l[j] <= 0) continue;
+      this.vx[j] = this.vx[j] * this.d[j] + (Math.random() - 0.5) * 0.12;
+      this.vy[j] = this.vy[j] * this.d[j] + (Math.random() - 0.5) * 0.12 + this.g[j];
+      this.x[j] += this.vx[j]; this.y[j] += this.vy[j];
+      this.l[j] -= 1;
+      const t = this.l[j] / this.m[j];
+      (t > 0.6 ? p0 : t > 0.3 ? p1 : p2).rect(this.x[j] * dpr - D / 2, this.y[j] * dpr - D / 2, D, D);
+      any = true;
+    }
+    if (!any) return;
+    ctx.globalAlpha = 0.95; ctx.fill(p0);
+    ctx.globalAlpha = 0.6; ctx.fill(p1);
+    ctx.globalAlpha = 0.28; ctx.fill(p2);
+    ctx.globalAlpha = 1;
+  };
+
+  // =====================================================================
+  // HERO: halftone bust (Flow video) + mouse dust + scroll dissolve → manifesto
+  // =====================================================================
+  const FPS = 24;
+  const SRC = { yatay: 'media/yatay.mp4', dikey: 'media/dikey.mp4' };
+  const pin = document.getElementById('top');
+  const stage = document.getElementById('hero');
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const htext = document.querySelector('.htext');
+  const maniLines = [...document.querySelectorAll('.mani .ln > span')];
+  const maniRest = [document.querySelector('.mani .label'), document.querySelector('.mani .meta')];
+  const off = document.createElement('canvas');
+  const octx = off.getContext('2d', { willReadFrequently: true });
+
+  let mode = null, video = null, cache = null, CW = 0, CH = 0, nFrames = 0;
+  let cached = false, loopStart = 0, live = null, lastT = -1, hasRVFC = false;
+  const pickMode = () => (innerWidth / innerHeight < 0.9 ? 'dikey' : 'yatay');
+
+  function load(m) {
+    mode = m; cached = false; live = null; lastT = -1;
+    if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
+    const v = document.createElement('video');
+    video = v;
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    v.src = SRC[m];
+    hasRVFC = 'requestVideoFrameCallback' in v;
+    v.addEventListener('loadedmetadata', () => {
+      if (v !== video) return;
+      const s = (m === 'yatay' ? 480 : 300) / v.videoWidth;
+      CW = Math.round(v.videoWidth * s); CH = Math.round(v.videoHeight * s);
+      off.width = CW; off.height = CH;
+      nFrames = Math.max(2, Math.round(v.duration * FPS));
+      cache = new Array(nFrames).fill(null);
+      v.play().catch(() => {
+        const go = () => { v.play(); removeEventListener('pointerdown', go); };
+        addEventListener('pointerdown', go);
+      });
+      if (hasRVFC) {
+        const cb = (now, md) => { if (v !== video || cached) return; grab(md.mediaTime); v.requestVideoFrameCallback(cb); };
+        v.requestVideoFrameCallback(cb);
+      }
+    });
+    v.addEventListener('ended', () => { if (v === video) finishCache(); });
+  }
+  function grab(t) {
+    octx.drawImage(video, 0, 0, CW, CH);
+    const d = octx.getImageData(0, 0, CW, CH).data;
+    const L = new Uint8Array(CW * CH);
+    for (let i = 0, j = 0; i < L.length; i++, j += 4) L[i] = (d[j] * 54 + d[j + 1] * 183 + d[j + 2] * 19) >> 8;
+    const idx = Math.min(nFrames - 1, Math.max(0, Math.round(t * FPS)));
+    cache[idx] = L; live = L;
+  }
+  function finishCache() {
+    let last = null;
+    for (let i = 0; i < nFrames; i++) { if (cache[i]) last = cache[i]; else cache[i] = last; }
+    let nxt = null;
+    for (let i = nFrames - 1; i >= 0; i--) { if (cache[i]) nxt = cache[i]; else cache[i] = nxt; }
+    if (!cache[0]) return;
+    cached = true; loopStart = performance.now();
+  }
+
+  const hField = new Field(10);
+  const hPtr = new Pointer(stage);
+  const hParts = new Particles(16000);
+  const hPts = [];
+  const hDust = new Float32Array(160000);
+  let hFrame = 0, lastP = 0;
+
+  function heroFrame(now) {
+    const pr = pin.getBoundingClientRect();
+    if (pr.bottom < 0) return;
+    const w = stage.clientWidth, h = stage.clientHeight;
+    const p = clamp(-pr.top / Math.max(1, pin.offsetHeight - h));
+    const dp = p - lastP; lastP = p;
+
+    // text choreography
+    const tOut = smooth(0, 0.2, p);
+    htext.style.opacity = 1 - tOut;
+    htext.style.transform = `translateY(${-tOut * 70}px)`;
+    maniLines.forEach((el, i) => { const t = smooth(0.4 + i * 0.06, 0.62 + i * 0.06, p); el.style.transform = `translateY(${(1 - t) * 110}%)`; });
+    maniRest.forEach(el => { el.style.opacity = smooth(0.62, 0.85, p); });
+
+    hFrame++;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const W = Math.round(w * dpr), H = Math.round(h * dpr);
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    const want = pickMode();
+    if (want !== mode) load(want);
+
+    hField.size(w, h);
+    hField.decay(0.965);
+    const R = Math.min(170, Math.max(90, w * 0.11));
+    hPtr.paint(hField, R, hPts);
+
+    let A = null, B = null, wt = 0;
+    if (cached) {
+      const period = (nFrames / FPS) * 2.2;
+      const ph = Math.PI + ((now - loopStart) / 1000) / period * Math.PI * 2;
+      const pos = (1 - Math.cos(ph)) / 2 * (nFrames - 1);
+      const i0 = Math.floor(pos), i1 = Math.min(nFrames - 1, i0 + 1);
+      A = cache[i0]; B = cache[i1]; wt = pos - i0;
+    } else {
+      if (!hasRVFC && video && !video.paused && CW && video.currentTime !== lastT) { lastT = video.currentTime; grab(lastT); }
+      A = live;
+    }
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = DOTC;
+    if (A) {
+      const scale = mode === 'yatay' ? (h * 0.98) / CH : (h * 0.72) / CH;
+      const ox = (w - CW * scale) / 2;
+      let oy = mode === 'yatay' ? h * 0.075 : h * 0.17;
+      if (mode === 'dikey') {
+        const h1 = htext.querySelector('.h1');
+        const h1b = h1.offsetTop + h1.offsetHeight;
+        oy = Math.max(oy, h1b + 14 - 0.165 * CH * scale);   // the head sits ~16.5% down the vertical video
+      }
+      const fadeH = h * 0.22;
+      // scroll dissolve: a soft edge sweeps from the top of the bust to the bottom
+      const s = clamp((p - 0.04) / 0.5);
+      const band = h * 0.22;
+      const sweepY = -band + s * (h + band * 2);
+
+      const bright = (sx, sy) => {
+        const u = (sx - ox) / scale, v = (sy - oy) / scale;
+        if (u < 0 || v < 0 || u >= CW || v >= CH) return 0;
+        const k = (v | 0) * CW + (u | 0);
+        const l = B ? A[k] + (B[k] - A[k]) * wt : A[k];
+        const bt = sy > h - fadeH ? Math.max(0, (h - sy) / fadeH) : 1;
+        return TONE[l | 0] * bt;
+      };
+
+      // ash: grains leave the dissolve edge and float up
+      if (s > 0 && s < 1) {
+        const n = Math.min(1100, 30 + Math.abs(dp) * h * 45);
+        const x0 = Math.max(0, ox), x1 = Math.min(w, ox + CW * scale);
+        for (let i = 0; i < n; i++) {
+          const x = x0 + Math.random() * (x1 - x0), y = sweepY - Math.random() * band;
+          const b = bright(x, y);
+          if (b < 0.06 || Math.random() > b) continue;
+          hParts.spawn(x, y, (Math.random() - 0.35) * 1.8, -(0.6 + Math.random() * 2.8), 70 + Math.random() * 80, 0.985, -0.012);
+        }
+      }
+      // mouse dust
+      if (hPts.length && s < 1) {
+        const pts = hPts.length / 2, speed = Math.hypot(hPtr.dx, hPtr.dy);
+        const per = Math.min(900, 14 + speed * 9) / pts;
+        for (let i = 0; i < hPts.length; i += 2) {
+          let n = Math.floor(per + Math.random());
+          while (n-- > 0) {
+            const a = Math.random() * Math.PI * 2, rr = Math.sqrt(Math.random()) * R * 0.75;
+            const x = hPts[i] + Math.cos(a) * rr, y = hPts[i + 1] + Math.sin(a) * rr;
+            if (y < sweepY) continue;
+            const b = bright(x, y);
+            if (b < 0.06 || Math.random() > b) continue;
+            const push = 0.25 + Math.random() * 0.75, out = 0.25 + Math.random() * 1.1;
+            hParts.spawn(x, y, hPtr.dx * 0.35 * push + Math.cos(a) * out, hPtr.dy * 0.35 * push + Math.sin(a) * out, 40 + Math.random() * 55, 0.95, 0);
+          }
+        }
+      }
+
+      if (sweepY - band < h) {
+        const cell = w < 700 ? 4 : 5;
+        const cols = Math.ceil(w / cell), rows = Math.ceil(h / cell);
+        const c0 = Math.max(0, Math.floor((ox - 80) / cell)), c1 = Math.min(cols, Math.ceil((ox + CW * scale + 80) / cell));
+        const r0 = Math.max(0, Math.floor(Math.max(oy, sweepY - band) / cell));
+        const grain = hFrame >> 1;
+        let nd = 0;
+        ctx.beginPath();
+        for (let r = r0; r < rows; r++) {
+          const y = r * cell + cell / 2;
+          const bott = y > h - fadeH ? Math.max(0, (h - y) / fadeH) : 1;
+          if (bott <= 0) break;
+          const v0 = (y - oy) / scale;
+          if (v0 >= CH) break;
+          if (v0 < 0) continue;
+          const er = y < sweepY ? clamp((sweepY - y) / band) : 0;
+          if (er >= 1) continue;
+          const frow = Math.min(hField.h - 1, (y / hField.fc) | 0) * hField.w;
+          const rowK = (v0 | 0) * CW;
+          for (let c = c0; c < c1; c++) {
+            const x = c * cell + cell / 2;
+            const u = (x - ox) / scale;
+            if (u < 0 || u >= CW) continue;
+            const k = rowK + (u | 0);
+            let l = A[k];
+            if (B) l += (B[k] - l) * wt;
+            const v = TONE[l | 0] * bott;
+            if (v < 0.04) continue;
+            let side = v * cell * 0.96;
+            if (er > 0) side *= 1 - er * (0.6 + 0.8 * hash(c, r, 3));   // ragged dissolve edge
+            const f = hField.a[frow + Math.min(hField.w - 1, (x / hField.fc) | 0)];
+            if (f > 0.02) {
+              side *= Math.max(0, 1 - f * 1.25);
+              const n = Math.min(3, Math.floor(v * 2.2 * f + hash(c, r, grain)));
+              const spread = f * 26;
+              for (let q = 0; q < n && nd < hDust.length - 2; q++) {
+                hDust[nd++] = x + (hash(c + q * 131, r, grain) - 0.5) * 2 * spread;
+                hDust[nd++] = y + (hash(c, r + q * 71, grain) - 0.5) * 2 * spread;
+              }
+            }
+            if (side < 0.5) continue;
+            const S = side * dpr;
+            ctx.rect(x * dpr - S / 2, y * dpr - S / 2, S, S);
+          }
+        }
+        ctx.fill();
+        if (nd) {
+          const D = 1.3 * dpr;
+          ctx.globalAlpha = 0.75; ctx.beginPath();
+          for (let i = 0; i < nd; i += 2) ctx.rect(hDust[i] * dpr - D / 2, hDust[i + 1] * dpr - D / 2, D, D);
+          ctx.fill(); ctx.globalAlpha = 1;
+        }
+      }
+    }
+    hParts.draw(ctx, dpr, 1.3);
+  }
+  load(pickMode());
+
+  // =====================================================================
+  // MARQUEES (speed reacts to scrolling)
+  // =====================================================================
+  const mqs = [...document.querySelectorAll('.mq-track')].map(t => ({ t, x: 0, dir: +t.dataset.dir || -1 }));
+  let lastSY = scrollY, sVel = 0;
+  function marqueeFrame() {
+    const sy = scrollY; sVel = sVel * 0.85 + (sy - lastSY) * 0.15; lastSY = sy;
+    if (reduce) return;
+    mqs.forEach(m => {
+      const half = m.t.scrollWidth / 2;
+      if (!half) return;
+      m.x += m.dir * (0.9 + Math.min(18, Math.abs(sVel) * 0.4));
+      if (m.x <= -half) m.x += half;
+      if (m.x > 0) m.x -= half;
+      m.t.style.transform = `translate3d(${m.x}px,0,0)`;
+    });
+  }
+
+  // =====================================================================
+  // WORKS: stacked panels, halftone "develops" into the photo
+  // =====================================================================
+  const panels = [...document.querySelectorAll('.panel')].map(el => {
+    const o = { el, pc: el.querySelector('.pc'), shade: el.querySelector('.shade'), img: el.querySelector('img'),
+      video: el.querySelector('video'), dev: el.querySelector('.dev'), grid: null, gw: 0, gh: 0, cell: 8, playing: false, lastT: -1 };
+    if (o.dev) o.dctx = o.dev.getContext('2d');
+    if (o.img) { if (o.img.complete) o.ready = true; else o.img.addEventListener('load', () => { o.ready = true; o.grid = null; }); }
+    if (o.video) {
+      // after the video ends, rest on the last frame for a few seconds, then play again
+      o.video.addEventListener('ended', () => {
+        clearTimeout(o.again);
+        o.again = setTimeout(() => { if (o.playing) { o.video.currentTime = 0; o.video.play().catch(() => {}); } }, 3500);
+      });
+    }
+    return o;
+  });
+  function buildDev(o) {
+    const w = o.el.clientWidth, h = o.el.clientHeight;
+    o.cell = w < 700 ? 6 : 8;
+    o.gw = Math.ceil(w / o.cell); o.gh = Math.ceil(h / o.cell);
+    const c = document.createElement('canvas'); c.width = o.gw; c.height = o.gh;
+    const x = c.getContext('2d', { willReadFrequently: true });
+    const iw = o.img.naturalWidth, ih = o.img.naturalHeight, sc = Math.max(o.gw / iw, o.gh / ih);
+    x.drawImage(o.img, (o.gw - iw * sc) / 2, (o.gh - ih * sc) / 2, iw * sc, ih * sc);
+    const d = x.getImageData(0, 0, o.gw, o.gh).data;
+    o.grid = new Float32Array(o.gw * o.gh);
+    for (let i = 0, j = 0; i < o.grid.length; i++, j += 4) o.grid[i] = Math.pow((d[j] * 0.21 + d[j + 1] * 0.72 + d[j + 2] * 0.07) / 255, 0.9);
+    o.w = w; o.h = h;
+  }
+  const peek = document.querySelector('.peek');
+  let hoverPanel = null;
+  if (hoverable) panels.forEach(o => {
+    o.el.addEventListener('pointerenter', () => {
+      peek.classList.add('on'); hoverPanel = o;
+      // finished video: hovering again replays it from the start
+      if (o.video && o.video.ended && o.playing) { clearTimeout(o.again); o.video.currentTime = 0; o.video.play().catch(() => {}); }
+    });
+    o.el.addEventListener('pointerleave', () => { peek.classList.remove('on'); hoverPanel = null; });
+  });
+  function worksFrame() {
+    const vh = innerHeight;
+    for (let i = 0; i < panels.length; i++) {
+      const o = panels[i];
+      const r = o.el.getBoundingClientRect();
+      if (r.top > vh || r.bottom < 0) { if (o.playing) { clearTimeout(o.again); o.video.pause(); o.playing = false; o.el.classList.remove('playing'); } continue; }
+      const nx = panels[i + 1];
+      const cov = nx ? clamp(1 - nx.el.getBoundingClientRect().top / vh) : 0;
+      o.pc.style.transform = cov > 0 ? `scale(${1 - 0.08 * cov})` : '';
+      o.shade.style.opacity = (cov * 0.75).toFixed(3);
+
+      if (o.img && o.ready) {
+        const d = clamp(1 - r.top / vh);                   // 0 entering → 1 fully on screen
+        const t = smooth(0.1, 0.95, d);
+        o.img.style.opacity = smooth(0.6, 1, t).toFixed(3);
+        const showDev = t < 1;
+        o.dev.style.opacity = (1 - smooth(0.82, 1, t)).toFixed(3);
+        if (showDev) {
+          if (!o.grid || o.w !== o.el.clientWidth || o.h !== o.el.clientHeight) buildDev(o);
+          const dpr = Math.min(devicePixelRatio || 1, 2);
+          const W = Math.round(o.w * dpr), H = Math.round(o.h * dpr);
+          if (o.dev.width !== W || o.dev.height !== H) { o.dev.width = W; o.dev.height = H; }
+          const x = o.dctx; x.clearRect(0, 0, W, H);
+          x.fillStyle = DOTC; x.beginPath();
+          const grow = 0.25 + 0.95 * t, cell = o.cell;
+          for (let gy = 0; gy < o.gh; gy++) for (let gx = 0; gx < o.gw; gx++) {
+            const side = Math.min(cell, o.grid[gy * o.gw + gx] * cell * grow);
+            if (side < 0.6) continue;
+            const S = side * dpr;
+            x.rect((gx * cell + cell / 2) * dpr - S / 2, (gy * cell + cell / 2) * dpr - S / 2, S, S);
+          }
+          x.fill();
+        }
+        // play the project video once the panel is settled and on top
+        const want = d > 0.97 && cov < 0.6;
+        if (o.video && want !== o.playing) {
+          o.playing = want;
+          if (want) o.video.play().then(() => o.el.classList.add('playing')).catch(() => {});
+          else { clearTimeout(o.again); o.video.pause(); o.el.classList.remove('playing'); }
+        }
+      }
+    }
+  }
+
+  // =====================================================================
+  // SERVICES: fill on view for touch screens
+  // =====================================================================
+  if (!hoverable) {
+    const so = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('fill', e.isIntersecting)), { rootMargin: '-42% 0px -42% 0px' });
+    document.querySelectorAll('.srv').forEach(el => so.observe(el));
+  }
+
+  // =====================================================================
+  // PROCESS: vertical scroll drives a horizontal track
+  // =====================================================================
+  const hpin = document.querySelector('.hpin'), htrack = document.querySelector('.htrack'), hbar = document.querySelector('.hbar i');
+  function sizeH() { hpin.style.height = (htrack.scrollWidth - innerWidth + innerHeight) + 'px'; }
+  function hFrameFn() {
+    const r = hpin.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    const p = clamp(-r.top / Math.max(1, hpin.offsetHeight - innerHeight));
+    const max = Math.max(0, htrack.scrollWidth - innerWidth);
+    htrack.style.transform = `translate3d(${-p * max}px,0,0)`;
+    hbar.style.transform = `scaleX(${p})`;
+  }
+
+  // =====================================================================
+  // FOOTER: "flowrix" wordmark in halftone squares that turn to dust
+  // =====================================================================
+  const fcv = document.getElementById('fcv'), fctx = fcv.getContext('2d'), fwrap = fcv.parentElement;
+  const fField = new Field(8), fPtr = new Pointer(fwrap), fParts = new Particles(8000), fPts = [];
+  let fGrid = null, fCols = 0, fRows = 0, fCell = 6, fW = 0, fH = 0, fVisible = false, fFrame = 0;
+  new IntersectionObserver(([e]) => { fVisible = e.isIntersecting; }).observe(fwrap);
+  function buildFooter() {
+    fW = fwrap.clientWidth; fH = fwrap.clientHeight;
+    fCell = fW < 700 ? 3 : 6;
+    fCols = Math.ceil(fW / fCell); fRows = Math.ceil(fH / fCell);
+    const c = document.createElement('canvas'); c.width = fCols; c.height = fRows;
+    const x = c.getContext('2d', { willReadFrequently: true });
+    let fs = 100;
+    x.font = `700 ${fs}px Jost`;
+    const mw = x.measureText('flowrix').width;
+    fs = fs * (fCols * 0.995) / mw;
+    x.font = `700 ${fs}px Jost`;
+    if ('letterSpacing' in x) x.letterSpacing = `${-fs * 0.055}px`;
+    const mw2 = x.measureText('flowrix').width;
+    if (mw2 > 0) { fs = fs * (fCols * 0.995) / mw2; x.font = `700 ${fs}px Jost`; if ('letterSpacing' in x) x.letterSpacing = `${-fs * 0.055}px`; }
+    const m = x.measureText('flowrix');
+    const asc = m.actualBoundingBoxAscent || fs * 0.75, desc = m.actualBoundingBoxDescent || 0;
+    x.fillStyle = '#fff';
+    x.fillText('flowrix', 0, (fRows + asc - desc) / 2);
+    const d = x.getImageData(0, 0, fCols, fRows).data;
+    fGrid = new Float32Array(fCols * fRows);
+    for (let i = 0, j = 3; i < fGrid.length; i++, j += 4) fGrid[i] = d[j] / 255;
+  }
+  function footerFrame() {
+    if (!fVisible) return;
+    if (!fGrid || fW !== fwrap.clientWidth || fH !== fwrap.clientHeight) buildFooter();
+    fFrame++;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const W = Math.round(fW * dpr), H = Math.round(fH * dpr);
+    if (fcv.width !== W || fcv.height !== H) { fcv.width = W; fcv.height = H; }
+    fField.size(fW, fH); fField.decay(0.965);
+    const R = Math.min(150, Math.max(70, fW * 0.09));
+    fPtr.paint(fField, R, fPts);
+    if (fPts.length) {
+      const pts = fPts.length / 2, speed = Math.hypot(fPtr.dx, fPtr.dy), per = Math.min(700, 10 + speed * 8) / pts;
+      for (let i = 0; i < fPts.length; i += 2) {
+        let n = Math.floor(per + Math.random());
+        while (n-- > 0) {
+          const a = Math.random() * Math.PI * 2, rr = Math.sqrt(Math.random()) * R * 0.75;
+          const x = fPts[i] + Math.cos(a) * rr, y = fPts[i + 1] + Math.sin(a) * rr;
+          const gx = (x / fCell) | 0, gy = (y / fCell) | 0;
+          if (gx < 0 || gy < 0 || gx >= fCols || gy >= fRows || Math.random() > fGrid[gy * fCols + gx]) continue;
+          const push = 0.25 + Math.random() * 0.75, out = 0.25 + Math.random() * 1.1;
+          fParts.spawn(x, y, fPtr.dx * 0.35 * push + Math.cos(a) * out, fPtr.dy * 0.35 * push + Math.sin(a) * out, 40 + Math.random() * 55, 0.95, 0);
+        }
+      }
+    }
+    fctx.clearRect(0, 0, W, H);
+    fctx.fillStyle = DOTC; fctx.beginPath();
+    const grain = fFrame >> 1;
+    for (let gy = 0; gy < fRows; gy++) {
+      const y = gy * fCell + fCell / 2;
+      for (let gx = 0; gx < fCols; gx++) {
+        const v = fGrid[gy * fCols + gx];
+        if (v < 0.04) continue;
+        const x = gx * fCell + fCell / 2;
+        let side = v * fCell * 0.9;
+        const f = fField.at(x, y);
+        if (f > 0.02) side *= Math.max(0, 1 - f * 1.3) * (0.7 + 0.3 * hash(gx, gy, grain));
+        if (side < 0.5) continue;
+        const S = side * dpr;
+        fctx.rect(x * dpr - S / 2, y * dpr - S / 2, S, S);
+      }
+    }
+    fctx.fill();
+    fParts.draw(fctx, dpr, 1.3);
+  }
+
+  // ---------- reveals ----------
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -10% 0px' });
+  document.querySelectorAll('.rv, .rvl').forEach(el => io.observe(el));
+
+  // ---------- peek cursor follow ----------
+  let pkx = 0, pky = 0;
+  function peekFrame() {
+    if (lastCX < 0) return;
+    pkx += (lastCX - pkx) * 0.2; pky += (lastCY - pky) * 0.2;
+    peek.style.translate = `${pkx}px ${pky}px`;
+    // see-through while the project video is playing, solid again when it ends
+    const v = hoverPanel && hoverPanel.video;
+    peek.classList.toggle('glass', !!(v && hoverPanel.playing && !v.paused && !v.ended));
+  }
+
+  // ---------- main loop ----------
+  sizeH();
+  addEventListener('resize', () => { sizeH(); panels.forEach(o => { o.grid = null; }); fGrid = null; });
+  document.fonts && document.fonts.ready.then(() => { fGrid = null; sizeH(); });
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (lenis) lenis.raf(now);
+    heroFrame(now);
+    marqueeFrame();
+    worksFrame();
+    hFrameFn();
+    footerFrame();
+    peekFrame();
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script src="cursor.js"></script>
+</body>
+</html>
